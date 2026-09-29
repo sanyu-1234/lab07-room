@@ -5,7 +5,7 @@ plugins {
     id("com.google.devtools.ksp") version "2.3.10"
 }
 
-val roomVersion = "2.6.1"
+val roomVersion = "2.8.5"
 
 android {
     namespace = "com.example.datossinmvvm"
@@ -46,9 +46,9 @@ android {
 
 dependencies {
 
-    // =========================
-    // ROOM
-    // =========================
+    // ==================================================
+    // ROOM - SQLite
+    // ==================================================
 
     implementation("androidx.room:room-runtime:$roomVersion")
 
@@ -57,37 +57,55 @@ dependencies {
     ksp("androidx.room:room-compiler:$roomVersion")
 
 
-    // =========================
+    // ==================================================
     // JETPACK COMPOSE
-    // =========================
+    // ==================================================
 
-    implementation(platform(libs.androidx.compose.bom))
+    implementation(
+        platform(libs.androidx.compose.bom)
+    )
 
-    implementation(libs.androidx.activity.compose)
+    implementation(
+        libs.androidx.activity.compose
+    )
 
-    implementation(libs.androidx.compose.material3)
+    implementation(
+        libs.androidx.compose.material3
+    )
 
-    implementation(libs.androidx.compose.ui)
+    implementation(
+        libs.androidx.compose.ui
+    )
 
-    implementation(libs.androidx.compose.ui.graphics)
+    implementation(
+        libs.androidx.compose.ui.graphics
+    )
 
-    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(
+        libs.androidx.compose.ui.tooling.preview
+    )
 
 
-    // =========================
+    // ==================================================
     // ANDROID
-    // =========================
+    // ==================================================
 
-    implementation(libs.androidx.core.ktx)
+    implementation(
+        libs.androidx.core.ktx
+    )
 
-    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(
+        libs.androidx.lifecycle.runtime.ktx
+    )
 
 
-    // =========================
-    // TEST
-    // =========================
+    // ==================================================
+    // TESTS
+    // ==================================================
 
-    testImplementation(libs.junit)
+    testImplementation(
+        libs.junit
+    )
 
     androidTestImplementation(
         platform(libs.androidx.compose.bom)
