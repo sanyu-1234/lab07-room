@@ -5,11 +5,16 @@ import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.room.Room
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScreenUser() {
 
@@ -36,9 +42,7 @@ fun ScreenUser() {
         db.userDao()
     }
 
-    var id by remember {
-        mutableStateOf("")
-    }
+    val coroutineScope = rememberCoroutineScope()
 
     var firstName by remember {
         mutableStateOf("")
@@ -52,120 +56,183 @@ fun ScreenUser() {
         mutableStateOf("")
     }
 
-    val coroutineScope = rememberCoroutineScope()
+    var mensaje by remember {
+        mutableStateOf("")
+    }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
+    Scaffold(
 
-        Spacer(
-            modifier = Modifier.height(50.dp)
-        )
+        topBar = {
 
-        TextField(
-            value = id,
-            onValueChange = {
-                id = it
-            },
-            label = {
-                Text("ID (solo lectura)")
-            },
-            readOnly = true,
-            singleLine = true
-        )
+            TopAppBar(
 
-        Spacer(
-            modifier = Modifier.height(10.dp)
-        )
+                title = {
+                    Text("Usuarios Room")
+                },
 
-        TextField(
-            value = firstName,
-            onValueChange = {
-                firstName = it
-            },
-            label = {
-                Text("First Name:")
-            },
-            singleLine = true
-        )
+                actions = {
 
-        Spacer(
-            modifier = Modifier.height(10.dp)
-        )
+                    TextButton(
+                        onClick = {
 
-        TextField(
-            value = lastName,
-            onValueChange = {
-                lastName = it
-            },
-            label = {
-                Text("Last Name:")
-            },
-            singleLine = true
-        )
+                            if (
+                                firstName.isNotBlank() &&
+                                lastName.isNotBlank()
+                            ) {
 
-        Spacer(
-            modifier = Modifier.height(15.dp)
-        )
+                                val user = User(
+                                    firstName = firstName,
+                                    lastName = lastName
+                                )
 
-        Button(
-            onClick = {
+                                coroutineScope.launch {
 
-                if (firstName.isNotBlank() && lastName.isNotBlank()) {
+                                    agregarUsuario(
+                                        user = user,
+                                        dao = dao
+                                    )
 
-                    val user = User(
-                        firstName = firstName,
-                        lastName = lastName
-                    )
+                                    dataUser = getUsers(dao)
+
+                                    mensaje =
+                                        "Usuario agregado correctamente"
+                                }
+
+                                firstName = ""
+                                lastName = ""
+
+                            } else {
+
+                                mensaje =
+                                    "Ingrese nombre y apellido"
+                            }
+                        }
+                    ) {
+                        Text("Agregar")
+                    }
+
+                    TextButton(
+                        onClick = {
+
+                            coroutineScope.launch {
+
+                                dataUser = getUsers(dao)
+
+                                mensaje =
+                                    "Usuarios actualizados"
+                            }
+                        }
+                    ) {
+                        Text("Listar")
+                    }
+                }
+            )
+        }
+
+    ) { innerPadding ->
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(16.dp)
+        ) {
+
+            TextField(
+                value = "",
+                onValueChange = {},
+                modifier = Modifier.fillMaxWidth(),
+                label = {
+                    Text("ID (solo lectura)")
+                },
+                readOnly = true,
+                singleLine = true
+            )
+
+            Spacer(
+                modifier = Modifier.height(10.dp)
+            )
+
+            TextField(
+                value = firstName,
+                onValueChange = {
+                    firstName = it
+                },
+                modifier = Modifier.fillMaxWidth(),
+                label = {
+                    Text("First Name:")
+                },
+                singleLine = true
+            )
+
+            Spacer(
+                modifier = Modifier.height(10.dp)
+            )
+
+            TextField(
+                value = lastName,
+                onValueChange = {
+                    lastName = it
+                },
+                modifier = Modifier.fillMaxWidth(),
+                label = {
+                    Text("Last Name:")
+                },
+                singleLine = true
+            )
+
+            Spacer(
+                modifier = Modifier.height(20.dp)
+            )
+
+            Button(
+                onClick = {
 
                     coroutineScope.launch {
 
-                        agregarUsuario(
-                            user = user,
-                            dao = dao
-                        )
+                        val eliminado =
+                            eliminarUltimoUsuario(dao)
+
+                        if (eliminado) {
+
+                            mensaje =
+                                "Último usuario eliminado correctamente"
+
+                        } else {
+
+                            mensaje =
+                                "No hay usuarios para eliminar"
+                        }
+
+                        dataUser =
+                            getUsers(dao)
                     }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
 
-                    firstName = ""
-                    lastName = ""
-                }
+                Text(
+                    "Eliminar último registro"
+                )
             }
-        ) {
+
+            Spacer(
+                modifier = Modifier.height(15.dp)
+            )
 
             Text(
-                text = "Agregar Usuario",
-                fontSize = 16.sp
+                text = mensaje
             )
-        }
 
-        Button(
-            onClick = {
-
-                coroutineScope.launch {
-
-                    dataUser = getUsers(
-                        dao = dao
-                    )
-                }
-            }
-        ) {
+            Spacer(
+                modifier = Modifier.height(15.dp)
+            )
 
             Text(
-                text = "Listar Usuarios",
-                fontSize = 16.sp
+                text = dataUser,
+                fontSize = 20.sp
             )
         }
-
-        Spacer(
-            modifier = Modifier.height(20.dp)
-        )
-
-        Text(
-            text = dataUser,
-            fontSize = 20.sp
-        )
     }
 }
 
@@ -213,7 +280,23 @@ suspend fun agregarUsuario(
 
         Log.e(
             "User",
-            "Error insertando usuario: ${e.message}"
+            "Error al insertar: ${e.message}"
         )
     }
+}
+
+
+suspend fun eliminarUltimoUsuario(
+    dao: UserDao
+): Boolean {
+
+    val ultimoUsuario =
+        dao.getLastUser()
+            ?: return false
+
+    dao.delete(
+        ultimoUsuario
+    )
+
+    return true
 }
